@@ -1,27 +1,88 @@
 /* app/globals.css */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap');
 
+/* --- THEME COLORS --- */
 :root {
-  --bg-cream: #FDFBF7;
-  --text-dark: #1A1A1A;
-  --accent-gold: #C5A358;
-  --white: #ffffff;
-  --glass: rgba(255, 255, 255, 0.4);
+  --cream-bg: #FDFBF7;
+  --gold-primary: #C5A358;
+  --gold-soft: #E8E2D2;
 }
 
-* {
+/* --- FLASH FIX & FADE-IN --- */
+html, body {
+  background-color: var(--cream-bg);
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
+/* මුලින්ම බොඩි එක නොපෙනී තිබිය යුතුය */
 body {
-  background-color: var(--bg-cream);
-  color: var(--text-dark);
-  font-family: 'Inter', sans-serif;
-  overflow-x: hidden;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
 }
 
-h1, h2, h3, .serif {
-  font-family: 'Cormorant Garamond', serif;
+/* ලෝඩ් වූ පසු පෙන්වන්න */
+.loaded body {
+  opacity: 1;
+}
+
+/* --- PRELOADER STYLES --- */
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--cream-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; /* හැමදේටම උඩින් තිබිය යුතුය */
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+
+/* වෙබ්සයිට් එක ලෝඩ් වූ පසු ලෝඩර් එක අයින් කරන්න */
+.loaded #preloader {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* --- GOLDEN WAVE LOADER --- */
+.loader {    
+  --r1: 154%;
+  --r2: 68.5%;
+  width: 60px;
+  aspect-ratio: 1;
+  border-radius: 50%; 
+  background:
+    radial-gradient(var(--r1) var(--r2) at top   , #0000 79.5%, var(--gold-primary) 80%),
+    radial-gradient(var(--r1) var(--r2) at bottom, var(--gold-primary) 79.5%, #0000 80%),
+    radial-gradient(var(--r1) var(--r2) at top   , #0000 79.5%, var(--gold-primary) 80%),
+    var(--gold-soft);
+  background-size: 50.5% 220%;
+  background-position: -100% 0%, 0% 0%, 100% 0%;
+  background-repeat: no-repeat;
+  animation: l9 1.8s infinite linear;
+}
+
+@keyframes l9 {
+    33%  { background-position: 0% 33% , 100% 33% , 200% 33% }
+    66%  { background-position: -100% 66% , 0% 66% , 100% 66% }
+    100% { background-position: 0% 100%, 100% 100%, 200% 100% }
+}
+
+.loader-text {
+  margin-top: 20px;
+  font-family: var(--font-cormorant), serif;
+  color: var(--gold-primary);
+  letter-spacing: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.95); }
+  50% { opacity: 1; transform: scale(1); }
 }
