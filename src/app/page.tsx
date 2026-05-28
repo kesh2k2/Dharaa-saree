@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Collections from '../components/collections';
+import Navbar from '../components/Navbar';         
+import Collections from '../components/Collections';
+import Reviews from '../components/Reviews';       
+import Contact from '../components/Contact';       
+import Footer from '../components/Footer';         
 
 const images = [
   "/saree1.jpg", 
@@ -21,226 +25,88 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <div className="hero-wrapper">
-        <div className="bg-circle-top"></div>
+    <div className="w-full min-h-screen bg-[#FDFBF7] text-zinc-900 overflow-x-hidden">
+      
+      {/* 1. Navbar */}
+      <Navbar />
+
+      {/* 2. Hero Section (Scoped using native Tailwind to avoid layout breaks) */}
+      <section className="relative w-full min-h-screen flex items-center justify-center pt-24 pb-12 px-4 sm:px-6 md:px-12 lg:px-16 overflow-hidden">
+        <div className="absolute top-[-200px] right-[-100px] w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(197,163,88,0.05)_0%,transparent_70%)] pointer-events-none z-0" />
         
-        <div className="container">
-          {/* වම් පැත්ත: පෙළ */}
-          <div className="content">
-            <div className="badge">NEW COLLECTION 2026</div>
-            <h1 className="title">
-              Exquisite <br /> <span className="italic">Craftsmanship</span>
+        {/* Responsive Content Grid */}
+        <div className="w-full max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center z-10">
+          
+          {/* Left Side: Text Details */}
+          <div className="lg:col-span-7 text-center lg:text-left space-y-6 max-w-2xl mx-auto lg:mx-0">
+            <div className="text-[#C5A358] font-bold text-xs sm:text-sm tracking-[3px] uppercase">
+              NEW COLLECTION 2026
+            </div>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-[#1a1a1a] leading-[1.1]">
+              Exquisite <br /> <span className="italic font-light text-[#C5A358]">Craftsmanship</span>
             </h1>
-            <p className="subtitle">
+            <p className="text-sm sm:text-base md:text-lg text-zinc-600 max-w-xl mx-auto lg:mx-0 leading-relaxed">
               Experience the fusion of tradition and modern luxury with our exclusive 
               hand-picked sarees, designed for the woman of grace.
             </p>
-            <div className="btn-group">
-              <button className="cta-btn primary">
-                Shop Now <span className="arrow">→</span>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+              <button className="bg-[#1a1a1a] text-white hover:bg-[#C5A358] hover:text-zinc-950 font-semibold px-8 py-4 rounded-full text-xs sm:text-sm transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-3 shadow-md">
+                Shop Now <span>→</span>
               </button>
-              <button className="cta-btn secondary">View Gallery</button>
+              <button className="bg-transparent text-[#1a1a1a] border border-[#1a1a1a] hover:bg-zinc-100 font-semibold px-8 py-4 rounded-full text-xs sm:text-sm transition-all duration-300">
+                View Gallery
+              </button>
             </div>
           </div>
 
-          {/* දකුණු පැත්ත: Optimized Arch Slider */}
-          <div className="visual-section">
-            <div className="image-arch">
+          {/* Right Side: Arch Slider Container */}
+          <div className="lg:col-span-5 flex justify-center items-center relative w-full pt-6 lg:pt-0">
+            
+            {/* Arch-shaped Frame */}
+            <div className="relative w-[280px] h-[400px] sm:w-[350px] sm:h-[480px] md:w-[380px] md:h-[530px] lg:w-[400px] lg:h-[560px] rounded-t-[200px] rounded-b-[20px] overflow-hidden bg-zinc-100 border-[8px] sm:border-[10px] border-white shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
               {images.map((img, index) => (
                 <div 
                   key={index} 
-                  className={`image-slide ${index === currentImage ? 'active' : ''}`}
+                  className={`absolute inset-0 bg-cover bg-center transition-all duration-[1500px] ease-in-out ${index === currentImage ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
                   style={{ backgroundImage: `url(${img})` }}
-                ></div>
+                />
               ))}
             </div>
 
-            {/* Floating Luxury Elements - Arch එකට ගැලපෙන සේ Position වෙනස් කළා */}
-            <div className="floating-card clients">
-              <div className="count">230K+</div>
-              <div className="label">Happy Clients</div>
+            {/* Floating Card 1: Happy Clients */}
+            <div className="absolute bottom-6 left-2 sm:left-[-20px] bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-[0_12px_25px_rgba(0,0,0,0.06)] border border-zinc-100 text-center z-20 min-w-[110px]">
+              <div className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">230K+</div>
+              <div className="text-[9px] sm:text-[10px] text-[#C5A358] font-bold uppercase tracking-wider">Happy Clients</div>
             </div>
 
-            <div className="floating-card quality">
-              <div className="icon">✦</div>
-              <div className="label">Premium Quality</div>
+            {/* Floating Card 2: Premium Quality */}
+            <div className="absolute top-12 right-2 sm:right-[-10px] bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl shadow-[0_12px_25px_rgba(0,0,0,0.06)] border border-zinc-100 flex items-center gap-2 z-20">
+              <span className="text-base sm:text-lg text-[#C5A358]">✦</span>
+              <span className="text-[10px] sm:text-xs text-[#C5A358] font-bold uppercase tracking-wider">Premium Quality</span>
             </div>
+
           </div>
+
         </div>
+      </section>
 
-        <style jsx>{`
-          .hero-wrapper {
-            background-color: #FDFBF7;
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-          }
-
-          .bg-circle-top {
-            position: absolute;
-            top: -200px;
-            right: -100px;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(197, 163, 88, 0.05) 0%, transparent 70%);
-            z-index: 1;
-          }
-
-          .container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 80px 8% 60px 8%;
-            gap: 60px;
-            max-width: 1400px;
-            margin: 0 auto;
-            z-index: 2;
-          }
-
-          .content { flex: 1.2; }
-
-          .badge {
-            color: #C5A358;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            margin-bottom: 20px;
-          }
-
-          .title {
-            font-size: 5rem; /* පොඩ්ඩක් අඩු කළා size එක */
-            font-family: 'Cormorant Garamond', serif;
-            line-height: 1;
-            margin-bottom: 25px;
-            color: #1a1a1a;
-          }
-
-          .italic { font-style: italic; color: #C5A358; font-weight: 300; }
-
-          .subtitle {
-            font-size: 1.1rem;
-            color: #555;
-            max-width: 480px;
-            line-height: 1.7;
-            margin-bottom: 40px;
-          }
-
-          .btn-group { display: flex; gap: 20px; }
-
-          .cta-btn {
-            padding: 16px 35px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.4s ease;
-            font-size: 0.85rem;
-          }
-
-          .primary {
-            background: #1a1a1a;
-            color: white;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-          }
-
-          .primary:hover { background: #C5A358; transform: translateY(-3px); }
-
-          .secondary {
-            background: transparent;
-            color: #1a1a1a;
-            border: 1px solid #1a1a1a;
-          }
-
-          .secondary:hover { background: #f0f0f0; }
-
-          /* --- BALANCED ARCH SLIDER --- */
-          .visual-section {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: flex-end;
-          }
-
-          .image-arch {
-            width: 420px; /* කලින් 480px තිබුණේ, දැන් 420px වලට අඩු කළා */
-            height: 580px; /* කලින් 650px තිබුණේ, දැන් 580px වලට අඩු කළා */
-            border-radius: 210px 210px 20px 20px; /* Ratio එකට අනුව radius එකත් හැදුවා */
-            overflow: hidden;
-            background: #eee;
-            position: relative;
-            border: 10px solid #fff;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.08);
-          }
-
-          .image-slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            opacity: 0;
-            transform: scale(1.08);
-            transition: opacity 1.5s ease-in-out, transform 2.2s ease-out;
-          }
-
-          .image-slide.active {
-            opacity: 1;
-            transform: scale(1);
-          }
-
-          /* Floating Cards */
-          .floating-card {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.06);
-            z-index: 5;
-          }
-
-          .clients {
-            bottom: 50px;
-            left: -30px;
-            text-align: center;
-          }
-
-          .quality {
-            top: 80px;
-            right: -15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-          }
-
-          .count { font-size: 1.6rem; font-weight: 700; color: #1a1a1a; }
-          .label { font-size: 0.7rem; color: #C5A358; font-weight: 700; text-transform: uppercase; }
-          .icon { font-size: 1.2rem; color: #C5A358; }
-
-          @media (max-width: 1200px) {
-            .title { font-size: 3.8rem; }
-            .image-arch { width: 350px; height: 480px; }
-          }
-
-          @media (max-width: 768px) {
-            .container { flex-direction: column; text-align: center; padding-top: 100px; }
-            .btn-group { justify-content: center; }
-            .visual-section { justify-content: center; margin-top: 50px; width: 100%; }
-            .image-arch { width: 300px; height: 420px; }
-            .clients { left: 50%; transform: translateX(-50%); bottom: -25px; }
-            .quality { display: none; }
-          }
-        `}</style>
+      {/* 3. Collections Section */}
+      <div className="w-full relative z-10">
+        <Collections />
       </div>
-      <Collections />
-    </>
+
+      {/* 4. Reviews Section */}
+      <div className="w-full relative z-10">
+        <Reviews />
+      </div>
+
+      {/* 5. Contact Section */}
+      <div className="w-full relative z-10">
+        <Contact />
+      </div>
+      
+
+
+    </div>
   );
 }

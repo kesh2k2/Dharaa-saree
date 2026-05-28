@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+'use client'; // Client Component එකක් විදිහට සකස් කිරීම
+
+import { useState, useEffect } from "react";
 import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
@@ -17,51 +19,63 @@ const cormorant = Cormorant_Garamond({
   display: 'swap' 
 });
 
-export const metadata: Metadata = {
-  title: "Dhāra Collection | Premium Saree Rentals",
-  description: "Exquisite sarees for rent and purchase in Sri Lanka",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Loader එක පෙන්වන්න සහ වහන්න State එකක්
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // බ්‍රවුසර් එකට ආපු ගමන් සයිට් එක ලෝඩ් වුනාම Loader එක අයින් කරන්න
+    const handleLoad = () => {
+      setLoading(false);
+    };
+
+    if (document.readyState === 'complete') {
+      setLoading(false);
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
+
+    // Safe-guard එකක්: තත්පර 1.5කට වඩා Loader එක එකදිගට තියෙන්න දෙන්නෙ නැහැ
+    const timer = setTimeout(() => setLoading(false), 1500);
+
+    return () => {
+      window.removeEventListener('load', handleLoad);
+      clearTimeout(timer);
+    };
+  }, []);
+
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${cormorant.variable}`}>
-        {/* --- PREMIUM PRELOADER --- */}
-        <div id="preloader">
-          <div className="loader"></div>
-          <div className="loader-text">DHĀRA</div>
-        </div>
+      <body className={`${inter.variable} ${cormorant.variable} bg-[#FDFBF7] antialiased`}>
+        
+        {/* --- PERFECT HYDRATION-SAFE PRELOADER --- */}
+        {loading && (
+          <div 
+            id="preloader" 
+            className="fixed inset-0 bg-[#FDFBF7] flex flex-col justify-center items-center z-[10000] transition-opacity duration-500 ease-in-out"
+          >
+            {/* Loader Circle */}
+            <div className="gold-loader w-[60px] aspect-square rounded-full"></div>
+            
+            {/* Animated Text */}
+            <div className="mt-5 font-[family-name:var(--font-cormorant)] text-[#C5A358] tracking-[5px] text-base font-medium uppercase animate-pulse">
+              DHĀRA
+            </div>
+          </div>
+        )}
 
         <Navbar /> 
         
-        <main style={{ minHeight: '80vh', background: '#FDFBF7' }}>
+        {/* Main Content Area */}
+        <main className="min-h-[80vh] bg-[#FDFBF7]">
           {children}
         </main>
 
         <Footer /> 
-
-        {/* --- HYDRATION & LOADER SCRIPT --- */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                // වෙබ්සයිට් එක සම්පූර්ණයෙන්ම ලෝඩ් වූ පසු
-                window.addEventListener('load', function() {
-                  document.documentElement.classList.add('loaded');
-                });
-                
-                // යම් හෙයකින් ලෝඩ් වීමට ප්‍රමාද වුවහොත් තත්පර 2කින් පෙන්වන්න
-                setTimeout(() => {
-                  document.documentElement.classList.add('loaded');
-                }, 2000);
-              })();
-            `,
-          }}
-        />
       </body>
     </html>
   );

@@ -1,38 +1,72 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { sarees, Saree } from '../data/products';
+import '../app/globals.css';
 
 export default function Collections() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedSaree, setSelectedSaree] = useState<Saree | null>(null);
   
-  // New States
-  const [orderType, setOrderType] = useState<'rent' | 'purchase'>('rent');
+  const [orderType, setOrderType] = useState<'rent' | 'purchase' | null>(null);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [totalPrice, setTotalPrice] = useState(0);
 
+  // --- LISTEN TO NAVBAR DROPDOWN CLICKS & REAL-TIME SEARCH ---
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (hash.includes('?filter=')) {
+        const urlParams = hash.split('?filter=')[1];
+        
+        const category = decodeURIComponent(urlParams.split('&')[0]);
+        setActiveCategory(category);
+        
+        if (urlParams.includes('&search=')) {
+          const query = decodeURIComponent(urlParams.split('&search=')[1]);
+          setSearchQuery(query);
+        } else {
+          setSearchQuery('');
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange();
+
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
   const categories = ['All', ...Array.from(new Set(sarees.map(s => s.category)))];
 
-  const filteredSarees = activeCategory === 'All' 
-    ? sarees 
-    : sarees.filter(s => s.category === activeCategory);
+  // --- FILTER LOGIC: CATEGORY + LIVE SEARCH ---
+  const filteredSarees = sarees.filter(saree => {
+    const matchesCategory = activeCategory === 'All' || saree.category === activeCategory;
+    const matchesSearch = saree.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          saree.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   // Logic: Rent Days & Price Calculation
   useEffect(() => {
-    if (selectedSaree) {
-      if (orderType === 'rent' && fromDate && toDate) {
-        const start = new Date(fromDate);
-        const end = new Date(toDate);
-        const diffTime = end.getTime() - start.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        
-        if (diffDays > 0) {
-          setTotalPrice(diffDays * selectedSaree.rentPricePerDay);
+    if (selectedSaree && orderType) {
+      if (orderType === 'rent') {
+        if (fromDate && toDate) {
+          const start = new Date(fromDate);
+          const end = new Date(toDate);
+          const diffTime = end.getTime() - start.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+          
+          if (diffDays > 0) {
+            setTotalPrice(diffDays * selectedSaree.rentPricePerDay);
+          } else {
+            setTotalPrice(0);
+          }
         } else {
           setTotalPrice(0);
         }
-      } else {
+      } else if (orderType === 'purchase') {
         setTotalPrice(selectedSaree.purchasePrice);
       }
     }
@@ -42,215 +76,185 @@ export default function Collections() {
     setSelectedSaree(null);
     setFromDate('');
     setToDate('');
-    setOrderType('rent');
+    setOrderType(null);
+    setTotalPrice(0);
   };
 
   return (
-    <section id="collections" className="collections-section">
-      <div className="container">
-        <div className="section-header">
-          <span className="badge">PREMIUM SELECTION</span>
-          <h2 className="title">Our <span>Collections</span></h2>
+    <section id="collections" className="py-12 md:py-16 px-4 md:px-12 bg-white scroll-mt-20">
+      <div className="container mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <span className="inline-block text-[#b3996d] font-bold tracking-widest text-xs uppercase mb-2">PREMIUM SELECTION</span>
+          <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900">Our <span className="text-[#b3996d]">Collections</span></h2>
+          
+          {searchQuery && (
+            <p className="text-xs text-zinc-500 mt-2">
+              Showing results for &ldquo;<span className="font-semibold text-zinc-800">{searchQuery}</span>&rdquo;
+            </p>
+          )}
         </div>
 
-        <div className="category-tabs">
+        {/* Category Buttons */}
+        <div className="flex flex-wrap gap-2 justify-center mb-8 md:mb-12 overflow-x-auto pb-2 max-w-full">
           {categories.map(cat => (
             <button 
               key={cat}
-              className={activeCategory === cat ? 'active' : ''}
-              onClick={() => setActiveCategory(cat)}
+              className={`px-4 md:px-5 py-2 md:py-2.5 rounded-full border border-zinc-200 text-xs md:text-sm font-medium transition-colors whitespace-nowrap hover:border-[#b3996d] hover:text-[#b3996d] ${activeCategory === cat ? 'bg-zinc-900 text-white border-zinc-900 hover:bg-zinc-800' : 'bg-white text-zinc-700'}`}
+              onClick={() => {
+                window.location.hash = `collections?filter=${encodeURIComponent(cat)}`;
+                setActiveCategory(cat);
+                setSearchQuery('');
+              }}
             >
-              {cat}
+              {cat === 'Designer Party' ? 'Designer Wear' : cat}
             </button>
           ))}
         </div>
 
-        <div className="product-grid">
+        {/* Product Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 md:gap-y-10">
           {filteredSarees.map(saree => (
-            <div key={saree.id} className="saree-card">
-              <div className="saree-img-box">
-                <img src={saree.images[0]} alt={saree.name} />
-                <div className="saree-tags">
-                  {saree.isAvailableForRent && <span className="rent-tag">Rent</span>}
-                  {saree.isAvailableForPurchase && <span className="buy-tag">Buy</span>}
+            <div key={saree.id} className="saree-card bg-white rounded-xl overflow-hidden border border-zinc-100 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between">
+              <div>
+                <div className="relative group overflow-hidden w-full aspect-[3/4] bg-zinc-50">
+                  <img 
+                    src={saree.images[0]} 
+                    alt={saree.name} 
+                    className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105" 
+                  />
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    {saree.isAvailableForRent && <span className="px-2.5 py-1 text-xs rounded-full font-semibold text-white bg-[#b3996d] shadow-sm">Rent</span>}
+                    {saree.isAvailableForPurchase && <span className="px-2.5 py-1 text-xs rounded-full font-semibold text-white bg-zinc-900 shadow-sm">Buy</span>}
+                  </div>
+                </div>
+                
+                <div className="p-5 md:p-6">
+                  <span className="text-xs text-[#b3996d] font-medium uppercase tracking-wider block mb-1">{saree.category}</span>
+                  <h3 className="text-base md:text-lg font-medium text-zinc-900 truncate">{saree.name}</h3>
+                  <p className="text-xs md:text-sm text-zinc-600 mt-1">Starting LKR {saree.rentPricePerDay.toLocaleString()}</p>
                 </div>
               </div>
-              <div className="saree-info">
-                <h3>{saree.name}</h3>
-                <p className="price">Starting LKR {saree.rentPricePerDay.toLocaleString()}</p>
-                <button className="details-btn" onClick={() => setSelectedSaree(saree)}>
+              <div className="px-5 pb-5 md:px-6 md:pb-6">
+                <button className="w-full py-2.5 rounded-lg border-2 border-zinc-900 bg-transparent text-zinc-900 font-semibold text-sm transition-colors hover:bg-zinc-900 hover:text-white" onClick={() => setSelectedSaree(saree)}>
                   View Details
                 </button>
               </div>
             </div>
           ))}
         </div>
+
+        {/* Empty State */}
+        {filteredSarees.length === 0 && (
+          <div className="text-center py-20 text-zinc-400 font-light max-w-md mx-auto">
+            <p className="text-lg font-medium text-zinc-600 mb-1">No items found</p>
+            <p className="text-sm">We couldn&rsquo;t find anything matching your request.</p>
+          </div>
+        )}
       </div>
 
-      {/* --- BUG FIXED MODAL --- */}
+      {/* --- FIXED RESPONSIVE MODAL CONTAINER --- */}
       {selectedSaree && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn-fixed" onClick={closeModal}>✕</button>
+        <div 
+          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/70 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 md:p-10" 
+          onClick={closeModal}
+        >
+          {/* Main White Window Box - Added `max-h-[85vh]` and `md:my-auto` to stop sticking to the navbar */}
+          <div 
+            className="relative bg-white rounded-2xl md:rounded-[24px] shadow-2xl w-full max-w-4xl p-5 sm:p-8 md:p-10 max-h-[85vh] overflow-y-auto my-auto border border-zinc-100 animate-fadeIn" 
+            onClick={(e) => e.stopPropagation()}
+          >
             
-            <div className="modal-body">
-              <div className="modal-gallery">
-                <img src={selectedSaree.images[0]} alt={selectedSaree.name} className="main-modal-img" />
+            {/* Close Button */}
+            <button className="absolute top-4 right-4 md:top-6 md:right-6 w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-colors z-10" onClick={closeModal}>✕</button>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mt-4 md:mt-0">
+              {/* Product Image Panel */}
+              <div className="modal-gallery w-full max-h-[300px] sm:max-h-[400px] md:max-h-none overflow-hidden rounded-xl md:rounded-2xl">
+                <img src={selectedSaree.images[0]} alt={selectedSaree.name} className="w-full h-full md:h-auto object-cover md:object-contain rounded-xl md:rounded-2xl" />
               </div>
 
-              <div className="modal-details">
-                <span className="modal-cat">{selectedSaree.category}</span>
-                <h2>{selectedSaree.name}</h2>
-                
-                <div className="order-type-selector">
-                  <button 
-                    className={orderType === 'rent' ? 'active' : ''} 
-                    onClick={() => setOrderType('rent')}
-                  >
-                    Rent Saree
-                  </button>
-                  <button 
-                    className={orderType === 'purchase' ? 'active' : ''} 
-                    onClick={() => setOrderType('purchase')}
-                  >
-                    Purchase Saree
-                  </button>
+              {/* Product Control Panel */}
+              <div className="modal-details flex flex-col justify-between">
+                <div>
+                  <span className="text-[#b3996d] font-semibold text-xs md:text-sm uppercase mb-1 block tracking-wider">{selectedSaree.category}</span>
+                  <h2 className="text-2xl md:text-3xl font-semibold text-zinc-900 pr-8">{selectedSaree.name}</h2>
+                  
+                  {/* Rent / Purchase Tabs */}
+                  <div className="flex bg-zinc-100 rounded-full p-1 my-5 md:my-6">
+                    <button 
+                      className={`flex-1 py-2 md:py-3 text-center text-xs md:text-sm font-semibold rounded-full transition-colors ${orderType === 'rent' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-700 hover:text-zinc-950'}`} 
+                      onClick={() => { setOrderType('rent'); setTotalPrice(0); }}
+                    >
+                      Rent Saree
+                    </button>
+                    <button 
+                      className={`flex-1 py-2 md:py-3 text-center text-xs md:text-sm font-semibold rounded-full transition-colors ${orderType === 'purchase' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-700 hover:text-zinc-950'}`} 
+                      onClick={() => setOrderType('purchase')}
+                    >
+                      Purchase Saree
+                    </button>
+                  </div>
+
+                  {/* Dynamic Inputs Based on Tab Choice */}
+                  {orderType === 'rent' && (
+                    <div className="space-y-4 md:space-y-6 animate-fadeIn">
+                      <div className="flex gap-3 sm:gap-4">
+                        <div className="flex-1 space-y-1">
+                          <label className="text-xs md:text-sm text-zinc-600 font-medium">From</label>
+                          <input type="date" value={fromDate} onChange={(e)=>setFromDate(e.target.value)} min={new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-zinc-200 text-xs md:text-sm outline-none focus:border-[#b3996d]" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <label className="text-xs md:text-sm text-zinc-600 font-medium">To</label>
+                          <input type="date" value={toDate} onChange={(e)=>setToDate(e.target.value)} min={fromDate || new Date().toISOString().split('T')[0]} className="w-full px-3 py-2 md:px-4 md:py-2.5 rounded-xl border border-zinc-200 text-xs md:text-sm outline-none focus:border-[#b3996d]" />
+                        </div>
+                      </div>
+                      <p className="text-xs md:text-sm text-zinc-700 font-medium">Rent Price: <span className="text-zinc-900 font-semibold">LKR {selectedSaree.rentPricePerDay.toLocaleString()}</span> per day</p>
+                    </div>
+                  )}
+
+                  {orderType === 'purchase' && (
+                    <div className="animate-fadeIn">
+                      <p className="text-xs md:text-sm text-zinc-600 bg-zinc-50 p-3.5 rounded-xl border border-zinc-100">Full Ownership: Premium product delivery within 3-5 working days with safe packaging.</p>
+                    </div>
+                  )}
+
+                  {!orderType && (
+                    <div className="text-center py-8 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200 my-4">
+                      <p className="text-xs md:text-sm text-zinc-500 font-medium px-4">Please select whether you want to <span className="text-[#b3996d] font-bold">Rent</span> or <span className="text-zinc-900 font-bold">Purchase</span> this item to see the pricing details.</p>
+                    </div>
+                  )}
                 </div>
 
-                {orderType === 'rent' ? (
-                  <div className="rent-options animate-fade">
-                    <div className="date-inputs">
-                      <div>
-                        <label>From</label>
-                        <input type="date" value={fromDate} onChange={(e)=>setFromDate(e.target.value)} min={new Date().toISOString().split('T')[0]}/>
-                      </div>
-                      <div>
-                        <label>To</label>
-                        <input type="date" value={toDate} onChange={(e)=>setToDate(e.target.value)} min={fromDate || new Date().toISOString().split('T')[0]}/>
-                      </div>
+                {/* Pricing Display Box & Confirm Button */}
+                {orderType && (
+                  <div className="animate-fadeIn mt-6 md:mt-4">
+                    <div className="flex items-center justify-between border-dashed border-2 border-[#e6dfcc] bg-[#f9f7f1] rounded-xl md:rounded-2xl p-4 md:p-6 mb-4 md:mb-6">
+                      <span className="text-xs md:text-sm text-zinc-700 font-medium">
+                        {orderType === 'rent' && !totalPrice ? 'Select Dates to Calculate:' : 'Total Amount:'}
+                      </span>
+                      <strong className="text-xl sm:text-2xl md:text-3xl font-bold text-zinc-900">
+                        LKR {totalPrice.toLocaleString()}
+                      </strong>
                     </div>
-                    <p className="info-text">Rent: LKR {selectedSaree.rentPricePerDay.toLocaleString()} per day</p>
-                  </div>
-                ) : (
-                  <div className="purchase-info animate-fade">
-                    <p className="info-text">Full Ownership: Standard delivery within 3-5 days.</p>
+
+                    <button 
+                      disabled={orderType === 'rent' && totalPrice === 0}
+                      className={`w-full py-3 md:py-4 rounded-full text-white text-sm md:text-base font-bold tracking-wide transition-all duration-300 shadow-md ${
+                        orderType === 'rent' && totalPrice === 0 
+                          ? 'bg-zinc-300 cursor-not-allowed shadow-none text-zinc-500' 
+                          : 'bg-[#b3996d] hover:bg-[#a68d60] active:scale-[0.99] shadow-[#b3996d]/20'
+                      }`}
+                    >
+                      Confirm {orderType === 'rent' ? 'Booking' : 'Purchase'}
+                    </button>
                   </div>
                 )}
 
-                <div className="total-display">
-                  <span>Total Amount:</span>
-                  <strong>LKR {totalPrice.toLocaleString()}</strong>
-                </div>
-
-                <button className="confirm-btn">
-                  Confirm {orderType === 'rent' ? 'Booking' : 'Purchase'}
-                </button>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .collections-section { padding: 60px 8%; background: #FDFBF7; min-height: 100vh; }
-        .container { max-width: 1300px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 40px; }
-        .badge { color: #C5A358; font-weight: 700; letter-spacing: 2px; font-size: 0.8rem; }
-        .title { font-size: 2.5rem; font-family: serif; margin-top: 10px; }
-        .title span { font-style: italic; color: #C5A358; }
-
-        /* Tabs & Grid */
-        .category-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 40px; flex-wrap: wrap; }
-        .category-tabs button { padding: 8px 20px; border-radius: 20px; border: 1px solid #ddd; background: #fff; cursor: pointer; transition: 0.3s; }
-        .category-tabs button.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
-        
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-
-        /* --- UPDATED CARD HOVER EFFECT --- */
-        .saree-card { 
-          background: #fff; 
-          border-radius: 12px; 
-          overflow: hidden; 
-          box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth Pop-up */
-          border: 1px solid transparent;
-          cursor: pointer;
-        }
-
-        .saree-card:hover, .saree-card:active { 
-          transform: translateY(-10px); /* Popup effect */
-          box-shadow: 0 15px 30px rgba(197, 163, 88, 0.25); /* Yellow/Gold Glow */
-          border-color: rgba(197, 163, 88, 0.3);
-        }
-
-        .saree-img-box { height: 350px; position: relative; }
-        .saree-img-box img { width: 100%; height: 100%; object-fit: cover; }
-        .saree-tags { position: absolute; top: 10px; left: 10px; display: flex; gap: 5px; }
-        .rent-tag, .buy-tag { padding: 4px 10px; font-size: 0.6rem; border-radius: 4px; color: #fff; font-weight: 700; }
-        .rent-tag { background: #C5A358; }
-        .buy-tag { background: #1a1a1a; }
-        .saree-info { padding: 20px; }
-        .details-btn { width: 100%; margin-top: 15px; padding: 10px; border: 1px solid #1a1a1a; background: transparent; cursor: pointer; font-weight: 600; }
-        .details-btn:hover { background: #1a1a1a; color: #fff; }
-
-        /* FIXED MODAL STYLES */
-        .modal-overlay {
-          position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-          background: rgba(0,0,0,0.85); z-index: 9999; 
-          display: flex; align-items: center; justify-content: center; padding: 20px;
-        }
-
-        .modal-content {
-          background: #fff; width: 100%; max-width: 900px; border-radius: 20px;
-          position: relative; max-height: 95vh; overflow-y: auto; padding: 40px;
-        }
-
-        .close-btn-fixed {
-          position: absolute; top: 15px; right: 15px; width: 40px; height: 40px;
-          background: #f5f5f5; border: none; border-radius: 50%;
-          font-size: 1.2rem; cursor: pointer; z-index: 10;
-          display: flex; align-items: center; justify-content: center; transition: 0.3s;
-        }
-        .close-btn-fixed:hover { background: #e0e0e0; transform: rotate(90deg); }
-
-        .modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        .main-modal-img { width: 100%; height: 450px; object-fit: cover; border-radius: 12px; }
-
-        .order-type-selector {
-          display: flex; background: #f0f0f0; padding: 5px; border-radius: 10px; margin: 20px 0;
-        }
-        .order-type-selector button {
-          flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 600;
-        }
-        .order-type-selector button.active { background: #1a1a1a; color: #fff; }
-
-        .date-inputs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .date-inputs div { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-        .date-inputs input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-
-        .total-display {
-          margin: 25px 0; padding: 15px; background: #FDFBF7; border: 1px dashed #C5A358;
-          display: flex; justify-content: space-between; align-items: center; border-radius: 10px;
-        }
-        .total-display strong { font-size: 1.4rem; color: #1a1a1a; }
-
-        .confirm-btn {
-          width: 100%; padding: 15px; background: #C5A358; color: #fff;
-          border: none; border-radius: 30px; font-size: 1rem; font-weight: 700; cursor: pointer;
-        }
-
-        .animate-fade { animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 768px) {
-          .modal-body { grid-template-columns: 1fr; }
-          .modal-content { padding: 25px 20px; }
-          .main-modal-img { height: 300px; }
-          .close-btn-fixed { top: 10px; right: 10px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-          /* Mobile specific hover replacement */
-          .saree-card:active { transform: scale(1.02); } 
-        }
-      `}</style>
     </section>
   );
 }

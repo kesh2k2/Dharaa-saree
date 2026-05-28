@@ -50,11 +50,11 @@ export default function Footer() {
           
           <div className="contact-item">
             <div className="contact-icon-box"><FaMapMarkerAlt /></div>
-            <p>Pilimatalawa, Kandy, Sri Lanka</p>
+            <p>137/B Pamunuwa, Pilimathalawa</p>
           </div>
           <div className="contact-item">
             <div className="contact-icon-box"><FaPhoneAlt /></div>
-            <p>+94 77 123 4567</p>
+            <p>0719780880</p>
           </div>
           <div className="contact-item">
             <div className="contact-icon-box"><FaEnvelope /></div>
