@@ -75,15 +75,15 @@ export default function Home() {
 
             {/* Floating Card 1: Happy Clients */}
             <div className="absolute bottom-6 left-2 sm:left-[-20px] bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-[0_12px_25px_rgba(0,0,0,0.06)] border border-zinc-100 text-center z-20 min-w-[110px]">
-              <div className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">230K+</div>
+              <div className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">30+</div>
               <div className="text-[9px] sm:text-[10px] text-[#C5A358] font-bold uppercase tracking-wider">Happy Clients</div>
             </div>
 
-            {/* Floating Card 2: Premium Quality */}
+            {/* Floating Card 2: Premium Quality
             <div className="absolute top-12 right-2 sm:right-[-10px] bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl shadow-[0_12px_25px_rgba(0,0,0,0.06)] border border-zinc-100 flex items-center gap-2 z-20">
               <span className="text-base sm:text-lg text-[#C5A358]">✦</span>
               <span className="text-[10px] sm:text-xs text-[#C5A358] font-bold uppercase tracking-wider">Premium Quality</span>
-            </div>
+            </div> */}
 
           </div>
 
