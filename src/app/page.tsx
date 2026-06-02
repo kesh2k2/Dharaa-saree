@@ -79,11 +79,11 @@ export default function Home() {
               <div className="text-[9px] sm:text-[10px] text-[#C5A358] font-bold uppercase tracking-wider">Happy Clients</div>
             </div>
 
-            {/* Floating Card 2: Premium Quality
+            {/* Floating Card 2: Premium Quality */}
             <div className="absolute top-12 right-2 sm:right-[-10px] bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl shadow-[0_12px_25px_rgba(0,0,0,0.06)] border border-zinc-100 flex items-center gap-2 z-20">
               <span className="text-base sm:text-lg text-[#C5A358]">✦</span>
               <span className="text-[10px] sm:text-xs text-[#C5A358] font-bold uppercase tracking-wider">Premium Quality</span>
-            </div> */}
+            </div>
 
           </div>
 
